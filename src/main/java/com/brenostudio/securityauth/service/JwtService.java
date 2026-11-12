@@ -105,5 +105,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-
+    public long getAccessTokenExpiryMs() {
+        return accessTokenExpiryMs;
+    }
 }
