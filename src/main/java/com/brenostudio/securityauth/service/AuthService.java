@@ -93,6 +93,7 @@ public class AuthService {
         return buildAuthResponse(user);
     }
 
+    @Transactional
     public AuthResponse login (LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new AuthenticationException("Invalid credentials"));
 
@@ -119,6 +120,7 @@ public class AuthService {
         return buildAuthResponse(user);
     }
 
+    @Transactional
     public MessageResponse logout (String accessToken, String email) {
         jwtService.blacklistToken(accessToken);
         userRepository.findByEmail(email).ifPresent(

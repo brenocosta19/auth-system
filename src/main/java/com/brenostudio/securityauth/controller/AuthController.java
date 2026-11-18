@@ -6,6 +6,7 @@ import com.brenostudio.securityauth.exception.ResourceNotFoundException;
 import com.brenostudio.securityauth.model.User;
 import com.brenostudio.securityauth.repositories.UserRepository;
 import com.brenostudio.securityauth.service.AuthService;
+import com.brenostudio.securityauth.service.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,6 +27,8 @@ public class AuthController {
     private final AuthService authService;
 
     private final UserRepository userRepository;
+
+    private final JwtService jwtService;
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user")
@@ -51,11 +54,11 @@ public class AuthController {
     @PostMapping("/logout")
     @Operation(summary = "Logout and invalidate tokens", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<ApiResponse<MessageResponse>> logout(
-            @RequestHeader("Authorization") String authHeader,
-            @AuthenticationPrincipal UserDetails currentUser
+            @RequestHeader("Authorization") String authHeader
     ) {
         String token = authHeader.substring(7);
-        return ResponseEntity.ok(ApiResponse.ok(authService.logout(token, currentUser.getUsername())));
+        String email = jwtService.extractUsername(token);
+        return ResponseEntity.ok(ApiResponse.ok(authService.logout(token, email)));
     }
 
     @PostMapping("/verify-email")
@@ -84,8 +87,9 @@ public class AuthController {
 
     @GetMapping("/me")
     @Operation(summary = "Get current authenticated user", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<ApiResponse<UserResponse>> me(@AuthenticationPrincipal UserDetails currentUser) {
-
+    public ResponseEntity<ApiResponse<UserResponse>> me(
+            @AuthenticationPrincipal UserDetails currentUser
+    ) {
         User user = userRepository.findByEmail(currentUser.getUsername())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
