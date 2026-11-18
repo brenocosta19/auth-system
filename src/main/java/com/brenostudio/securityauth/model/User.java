@@ -105,6 +105,15 @@ public class User implements UserDetails {
         return false;
     }
 
+    /**
+     * Identificador de autenticação do Spring Security.
+     * O login é feito por email; o campo "username" é apenas o nome público.
+     */
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
